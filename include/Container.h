@@ -5,11 +5,10 @@
 
 #include <vector>
 
-extern int height; // Other files will use this field so a static variable is used 
 
 static class Container {
 private:
-	float width, posX, posY, area;
+	float width, posX, posY, area, height;
 	ParticleController controller;
 public:
 	
@@ -18,11 +17,12 @@ public:
 		posX = CONTAINER_X_POS * WINDOW_WIDTH;
 		posY = CONTAINER_MIN_Y_POS * WINDOW_HEIGHT;
 		width = CONTAINER_WIDTH * WINDOW_WIDTH;
-		height = 0.4 * WINDOW_HEIGHT;
+		height = 0;
+		change_height(0.4 * WINDOW_HEIGHT);
 		//Adjust the Y coordinate and recalculate area
 		calculate_dimensions();	
 		//Create an instance of the particle controller to control the simulation
-		controller = ParticleController();
+		
 	}
 	
 	//Will recalculate the position and area when height is changed
@@ -43,6 +43,7 @@ public:
 	void change_height(double amount) {
 		height = height += amount;
 		calculate_dimensions();
+		controller.height = height;
 	}
 	
 	

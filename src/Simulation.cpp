@@ -16,8 +16,6 @@ bool Simulation::OnUserCreate() {
 }
 
 bool Simulation::OnUserUpdate(float fElapsedTime) {
-	auto current_frame = std::chrono::high_resolution_clock::now(); //record time before the iteration
-	time_between_frames  = (float)std::chrono::duration_cast<std::chrono::nanoseconds>(current_frame - last_frame).count() / 1000000000;
 	
 	//Clear the window with a dark grey background
 	Clear(olc::DARK_GREY); 
@@ -31,7 +29,7 @@ bool Simulation::OnUserUpdate(float fElapsedTime) {
 	//Check if any buttons have been clicked
 	CheckButtonPress();
 	
-	last_frame = std::chrono::high_resolution_clock::now(); //record time after the iteration
+	container.get_controller()->set_time_between_frames(fElapsedTime);
 
 	return true;
 }
@@ -87,12 +85,10 @@ void Simulation::DrawParticles() {
 void Simulation::DrawParticle(Particle p) {
 	//get the position of the particle
 	
-	olc::vi2d pos = get_screen_coords({p.get_position()});
+	olc::vi2d pos = get_screen_coords({p.get_position()},container.get_height());
 	//Draw the particle
 	FillCircle(pos, p.get_radius() , olc::GREEN);
 	FillCircle(pos + ((float)p.get_radius() * p.get_velocity().norm()), 2, olc::RED);
 	
 }
 
-//olc::vf2d position = add_container_margins({ int(rand() % int(CONTAINER_WIDTH*WINDOW_WIDTH - SMALL_PARTICLE_SIZE)),int(rand() % int(height - SMALL_PARTICLE_SIZE)) });
-//olc::vf2d position = add_container_margins({ int(rand() % int(CONTAINER_WIDTH * WINDOW_WIDTH - LARGE_PARTICLE_SIZE)),int(rand() % int(height - LARGE_PARTICLE_SIZE)) });

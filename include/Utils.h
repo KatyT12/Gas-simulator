@@ -20,9 +20,10 @@
 #define GUI_SIZE_X 0.55
 #define GUI_SIZE_Y 0.93
 
+#define PI 3.14159
 
-static float time_between_frames = 0;
-static int height;
+
+
 
 
 enum PARTICLE_TYPE
@@ -31,13 +32,13 @@ enum PARTICLE_TYPE
 	HEAVY
 };
 
-static olc::vi2d get_screen_coords(olc::vf2d position) {
+static olc::vi2d get_screen_coords(olc::vf2d position, int height) {
 	olc::vi2d ret = { int(position.x / 100 * CONTAINER_WIDTH * WINDOW_WIDTH),int(position.y / (100 * (height / (0.4 * WINDOW_HEIGHT))) * height) };
 	ret = { int(ret.x + CONTAINER_X_POS * WINDOW_WIDTH),int(ret.y + WINDOW_HEIGHT - (CONTAINER_MIN_Y_POS * WINDOW_HEIGHT + height)) };
 	return ret;
 }
 
-static olc::vi2d add_container_margins(olc::vi2d position) {
+static olc::vi2d add_container_margins(olc::vi2d position, int height) {
 	olc::vi2d ret = { int(position.x + CONTAINER_X_POS * WINDOW_WIDTH),int(position.y + WINDOW_HEIGHT - (CONTAINER_MIN_Y_POS * WINDOW_HEIGHT + height)) };
 	return ret;
 }
@@ -45,15 +46,15 @@ static olc::vi2d add_container_margins(olc::vi2d position) {
 static float rescale_length(float length) {
 	 return (length * 100 / (CONTAINER_WIDTH * WINDOW_WIDTH));
 }
-static float rescale_height(float old_height) {
+static float rescale_height(float old_height, int height) {
 	return old_height * ((100 * (height / (WINDOW_HEIGHT * 0.4))) / (height - CONTAINER_MIN_Y_POS * WINDOW_HEIGHT));
 }
 
-static olc::vi2d delocalize_position(olc::vf2d position) {
+static olc::vi2d delocalize_position(olc::vf2d position, int height) {
 	olc::vi2d ret = { int(position.x / 100 * CONTAINER_WIDTH * WINDOW_WIDTH),int(position.y / (100 * (height / (0.4 * WINDOW_HEIGHT))) * height) };
 	return ret;
 }
-static olc::vf2d localize_position(olc::vi2d position) {
+static olc::vf2d localize_position(olc::vi2d position, int height) {
 	olc::vf2d ret = { float(position.x - (CONTAINER_X_POS * WINDOW_WIDTH)),float(position.y - (WINDOW_HEIGHT - (CONTAINER_MIN_Y_POS * WINDOW_HEIGHT + height))) };
 	ret = { float(ret.x * 100 / (CONTAINER_WIDTH * WINDOW_WIDTH)),float(ret.y * (100 * (height / (0.4 * WINDOW_HEIGHT))) / height) };
 	return ret;
