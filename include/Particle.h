@@ -13,12 +13,16 @@ private:
 	olc::vf2d position;
 	PARTICLE_TYPE type;
 	
+	
+	
 public:
 	//Constructor
 	Particle(float mass, int radius, olc::vf2d position, PARTICLE_TYPE type) 
 		//Setting up the fields of the particle
 		:mass(mass), radius(radius), position(position), kinetic_energy(0), velocity(olc::vf2d(0, 0)), type(type) {} 
 
+	//For debugging only
+	int id;
 
 	void move(float seconds, int height) {
 		check_collision_with_container({ position.x + (seconds * velocity.x), position.y + (seconds * velocity.y) }, height);
@@ -60,7 +64,7 @@ public:
 		}
 		return false;
 	}
-
+ 
 	void handle_collision(Particle* p, float seconds, olc::vf2d velocity2) {
 		//Next position of the two particles
 		olc::vf2d pos = { position.x + (seconds * velocity.x), position.y + (seconds  * velocity.y) };
@@ -90,6 +94,11 @@ public:
 	void set_velocity(olc::vf2d velocity) { this->velocity = velocity; }
 	
 	olc::vf2d get_velocity() { return velocity;}
+
+	float get_kinetic_energy() { return kinetic_energy; }
+	void set_kinetic_energy(float ke) { kinetic_energy = ke; }
+
+	float get_mass() { return mass; }
 
 };
 
