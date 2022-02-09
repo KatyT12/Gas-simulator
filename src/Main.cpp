@@ -10,16 +10,12 @@ int main()
 	return 0;
 }
 
-
-
-
-
-
-
-
-
-
-
-
+/*
+* Changes to document:
+* Particle.cpp
+* Temperature and energy methods
+* Possibly change private and public methods
+* srand in constructor (possible testing error)
+*/
 
 

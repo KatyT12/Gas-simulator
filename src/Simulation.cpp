@@ -1,12 +1,9 @@
 #include <Simulation.h>
 
-
-
-
 Simulation::Simulation() {
 	sAppName = "Simulation"; //Setting the title of the window
 	last_frame = std::chrono::high_resolution_clock::now(); //The time of the applications intitialization
-	currentMode = testMode(container.get_controller()); //Setting the current interface (Would be the default)
+	currentMode = testMode(container.get_controller(),&container); //Setting the current interface (Would be the default)
 	
 }
 
@@ -88,7 +85,5 @@ void Simulation::DrawParticle(Particle p) {
 	olc::vi2d pos = get_screen_coords({p.get_position()},container.get_height());
 	//Draw the particle
 	FillCircle(pos, p.get_radius() , olc::GREEN);
-	FillCircle(pos + ((float)p.get_radius() * p.get_velocity().norm()), 2, olc::RED);
-	
 }
 

@@ -5,8 +5,10 @@
 #include <Button.h>
 #include <ParticleController.h>
 
+
 class Gui {
 public:
+	
 	std::vector<Button> buttons; //Buttons the mode will contain
 	
 	//Position,size and colour on the window
@@ -18,7 +20,7 @@ public:
 protected:
 	
 	//Constructor
-	Gui(olc::Pixel colour,ParticleController* controller) : colour(colour),controller(controller) {}
+	Gui(olc::Pixel colour,ParticleController* controller, Container* container) : colour(colour),controller(controller) {}
 
 	void addButton(Button b) {
 		buttons.push_back(b); //push the new button to the back of the vector

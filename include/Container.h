@@ -6,6 +6,8 @@
 #include <vector>
 
 
+
+
 static class Container {
 private:
 	float width, posX, posY, area, height;
@@ -46,5 +48,14 @@ public:
 		controller.height = height;
 	}
 	
+	/// <summary>
+	/// Load a state on the simulation, edit the height of the container then let
+	/// the particle controller handle the rest
+	/// </summary>
+	/// <param name="state"></param>
+	void load_state(State state) {
+		change_height(state.height - height);
+		controller.load_state(state);
+	}
 	
 };
