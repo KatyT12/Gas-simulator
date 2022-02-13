@@ -19,7 +19,8 @@ void ParticleController::update() {
 
 bool ParticleController::add_particle(PARTICLE_TYPE type) {
 
-	if (particle_count + 1 <= MAX_PARTICLES_NUM) {
+	//Possible error
+	if (particles.size() <= MAX_PARTICLES_NUM) {
 		particle_count += 1;
 		
 
@@ -31,9 +32,10 @@ bool ParticleController::add_particle(PARTICLE_TYPE type) {
 			particles.emplace_back(Particle(0.001, LARGE_PARTICLE_SIZE, position, type));
 		}
 		else if (type == PARTICLE_TYPE::LIGHT) {
+		
 			olc::vf2d position = { (float)(rand() % int(100 - rescale_length(2 * SMALL_PARTICLE_SIZE) - 2) + rescale_length(SMALL_PARTICLE_SIZE)) + 1, float(rand() % int(100 - rescale_height(2 * SMALL_PARTICLE_SIZE,height) - 2) + rescale_height(SMALL_PARTICLE_SIZE,height) + 1) };
 			particles.emplace_back(Particle(0.001, SMALL_PARTICLE_SIZE, position, type));
-
+		
 		}
 
 		particles.back().set_velocity(velocity);
@@ -46,6 +48,16 @@ bool ParticleController::add_particle(PARTICLE_TYPE type) {
 	else {
 		return false; //A particle couldn't be added to the simulation
 	}
+}
+
+/// <summary>
+/// change the temperature and calculate the change in energy needed for the particles
+/// </summary>
+/// <param name="temperature_add"></param>
+void ParticleController::increment_temperature(float temperature_add) {
+	temperature += temperature_add;
+	// 3/2 * boltzmann constant * temperature = energy (boltzmann constant edited)
+	delta_energy = delta_energy += (3 / 2) * 1.3806452 * pow(10, -1) * temperature_add;
 }
 
 
@@ -98,20 +110,35 @@ void ParticleController::load_state(State& state) {
 	}
 }
 
+
+
 /// <summary>
 /// Update the enrgy of particles according to temperature change.
 /// Done in each frame after a change in temperature until there is no change to
 /// be done
 /// </summary>
 void ParticleController::update_particle_energies() {
+	//delta energy is the change in energy that needs to be done
+	//calculates energy to add/subtract this frame
 	float energy = delta_energy * time_between_frames * 100;
 	delta_energy = delta_energy - energy;
 
+	//Alter energy of particles and recalculate their velocities
 	for (Particle& p : particles) {
 		p.add_energy(energy);
 		p.calc_velocity();
 	}
+	//If the magnitude of the energy left to add is less than a very small number set it to 0
 	if (std::pow(std::pow(delta_energy, 2), 0.5) < 0.0000001) {
 		delta_energy = 0;
+	}
+}
+
+/*Testing*/
+void ParticleController::correct_particles(int amount) {
+	for (Particle& p : particles) {
+		olc::vf2d pos = { p.get_position().x,p.get_position().y + (((float)amount / (float)height) * 100 * (float)(height / (float)(WINDOW_HEIGHT * 0.4))) };
+
+		p.set_position(pos);
 	}
 }

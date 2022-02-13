@@ -12,8 +12,9 @@ int main()
 
 /*
 * Changes to document:
-* Particle.cpp
-* Temperature and energy methods
+* Text in buttons and button clicking
+* Gui adjustments
+* Buttons in testgui
 * Possibly change private and public methods
 * srand in constructor (possible testing error)
 */

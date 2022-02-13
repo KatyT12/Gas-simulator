@@ -15,7 +15,7 @@ bool Particle::check_collision_with_container(olc::vf2d pos, int height) {
 		return true;
 	}
 	//Check if the particle has collided with the top or bottom edge
-	else if (pos.y + rescale_height(radius, height) >= 99 || pos.y - rescale_height(radius, height) <= 1) {
+	else if (pos.y + rescale_height(radius, height) >= 100 * height / (WINDOW_HEIGHT * 0.4) - 1 || pos.y - rescale_height(radius, height) <= 1) {
 		velocity = { velocity.x , velocity.y * -1 };
 		return true;
 	}

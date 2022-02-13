@@ -41,6 +41,8 @@ public:
 
 	//Get and set methods
 	inline olc::vf2d get_position() { return position; }
+	inline void set_position(olc::vf2d pos) { position = pos; }
+
 	inline int get_radius() { return radius;}
 	
 	inline void set_velocity(olc::vf2d velocity) { this->velocity = velocity; }
@@ -51,6 +53,6 @@ public:
 	inline void set_energy(float energy) { kinetic_energy = energy; }
 	
 	inline float get_mass() { return mass; }
-
+	
 };
 

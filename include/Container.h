@@ -46,6 +46,7 @@ public:
 		height = height += amount;
 		calculate_dimensions();
 		controller.height = height;
+		controller.correct_particles(amount);
 	}
 	
 	/// <summary>

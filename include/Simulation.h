@@ -29,10 +29,13 @@ private:
 	void DrawContainer();
 	void DrawGui();
 	void DrawButton(Button b);
+	void DrawTextDisplays();
 	void DrawParticles();
 	void DrawParticle(Particle p);
+	void DrawHelpDialog();
+	
 
-	void CheckButtonPress();
+	void CheckButtonPress(uint32_t action);
 
 	std::chrono::time_point<std::chrono::steady_clock> last_frame; // The variable to hold the time point of the last frame
 	Gui currentMode; //The current interface in use

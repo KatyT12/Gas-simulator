@@ -15,11 +15,12 @@ private:
 	olc::vi2d size;
 	olc::Pixel colour;
 	std::string text;
+	olc::Pixel text_colour = olc::BLACK;
 
 	//Procedure that will be called when the button is clicked
 	std::function<void(void)> func;
 public:
-	
+	bool clicked = false;
 	Button(){}
 
 	Button(olc::vi2d position, olc::vi2d size, olc::Pixel colour, std::string text)
@@ -34,6 +35,7 @@ public:
 	inline olc::vi2d get_position() { return position; }
 	inline olc::Pixel get_color() { return colour; }
 	inline std::string get_text() { return text; }
+	inline olc::Pixel get_text_colour() { return text_colour; }
 
 	//runs the buttons given function when it is pressed
 	void pressed() {
