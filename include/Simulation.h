@@ -33,7 +33,7 @@ private:
 	void DrawParticles();
 	void DrawParticle(Particle p);
 	void DrawHelpDialog();
-	
+	void DrawGuiRectangle(olc::vi2d pos, olc::vi2d size, olc::vi2d border_pos, olc::vi2d border_size,olc::Pixel colour);
 
 	void CheckButtonPress(uint32_t action);
 

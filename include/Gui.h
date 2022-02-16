@@ -37,17 +37,17 @@ public:
 protected:
 	
 	//Constructor
-	Gui(olc::Pixel colour,ParticleController* controller, Container* container) : colour(colour),controller(controller) {
-		addButton(Button({position.x-4, 40}, { 150,30 }, olc::WHITE, "RESET"));
+	Gui(olc::Pixel colour, ParticleController* controller, Container* container) : colour(colour), controller(controller) {
+		addButton(Button({ position.x - 3, 40 }, { 150,30 }, olc::Pixel(154, 164, 179), "RESET",olc::WHITE));
 		//Define the state to reset to: temperature of 30, height of 0.4* window width and 1 particle in the simulation.
 		State Reset_state = { 303.15,0.4 * WINDOW_HEIGHT,1 };
 		//Set the button to call the container.load_state() method
-		buttons[buttons.size()-1].set_pressed_func([container, Reset_state]() {container->load_state(Reset_state); });
+		buttons[buttons.size() - 1].set_pressed_func([container, Reset_state]() {container->load_state(Reset_state); });
 
-		addButton(Button({ int(position.x+size.x/2 -150/2), 40 }, { 150,30 }, olc::WHITE, "HELP"));
+		addButton(Button({ int(2*position.x + size.x - 150 )/2, 40 }, { 150,30 }, olc::Pixel(154, 164, 179), "HELP",olc::WHITE));
 		buttons[buttons.size() - 1].set_pressed_func([controller]() {controller->help_dialog = !controller->help_dialog; });
 
-		addButton(Button({ int(position.x + size.x - 150) , 40 }, { 150,30 }, olc::WHITE, "CHANGE MODE"));
+		addButton(Button({ int(position.x  + size.x - 149) , 40 }, { 150,30 }, olc::Pixel(154, 164, 179), "CHANGE MODE",olc::WHITE));
 		buttons[buttons.size() - 1].set_pressed_func([controller]() {controller->help_dialog = !controller->help_dialog; });
 	}
 

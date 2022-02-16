@@ -70,5 +70,5 @@ void Particle::handle_collision(Particle* p, float seconds, olc::vf2d velocity2)
 /// </summary>
 void Particle::calc_velocity() {
 	velocity = velocity / velocity.mag();
-	velocity *= pow(kinetic_energy * 2 / mass, 0.5);
+	velocity *= std::max(pow(kinetic_energy * 2 / mass, 0.5),0.5);
 }

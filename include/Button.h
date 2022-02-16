@@ -25,7 +25,8 @@ public:
 
 	Button(olc::vi2d position, olc::vi2d size, olc::Pixel colour, std::string text)
 	:position(position), size(size), colour(colour), text(text){}
-
+	Button(olc::vi2d position, olc::vi2d size, olc::Pixel colour, std::string text,olc::Pixel text_colour)
+		:position(position), size(size), colour(colour), text(text), text_colour(text_colour) {}
 	//Sets the function that the button will run. This should be done right after the instance is constructed
 	void set_pressed_func(std::function<void(void)> func) {
 		this->func = func;

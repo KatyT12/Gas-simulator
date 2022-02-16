@@ -41,12 +41,17 @@ public:
 	//Return a reference to the particle controller so other class can use it
 	ParticleController* get_controller() { return &controller; }
 
-	//Will change the height and re calculate dimensions of the container
+	/// <summary>
+	/// Change the height of the container
+	/// </summary>
+	/// <param name="amount"></param>
 	void change_height(double amount) {
-		height = height += amount;
-		calculate_dimensions();
-		controller.height = height;
-		controller.correct_particles(amount);
+		if (height + amount < 600 && height + amount> 100) {
+			height = height += amount;
+			calculate_dimensions();
+			controller.height = height;
+			controller.correct_particles(amount);
+		}
 	}
 	
 	/// <summary>

@@ -17,29 +17,37 @@ void ParticleController::update() {
 	}
 }
 
-bool ParticleController::add_particle(PARTICLE_TYPE type) {
+olc::vf2d ParticleController::get_random_unit_vector() {
+	float theta = (((float)rand() / RAND_MAX) * 2 * PI);
+	float x = cos(theta);
+	float y = sin(theta);
+	return { x,y };
+}
 
+bool ParticleController::add_particle(PARTICLE_TYPE type) {
+	float energy = (3 / 2) * 1.3806452 * 2* pow(10, -2) * temperature;
 	//Possible error
 	if (particles.size() <= MAX_PARTICLES_NUM) {
 		particle_count += 1;
 		
-
-		olc::vf2d velocity = { 50,50 };
-
+		float mass;
 		//radius & mass changes depending on particle type so an if statement is needed
 		if (type == PARTICLE_TYPE::HEAVY) {
+			mass = LARGE_PARTICLE_MASS;
 			olc::vf2d position = { (float)(rand() % int(100 - rescale_length(2 * LARGE_PARTICLE_SIZE) - 1) + rescale_length(LARGE_PARTICLE_SIZE)), float(rand() % int(100 - rescale_height(2 * LARGE_PARTICLE_SIZE,height)) + rescale_height(LARGE_PARTICLE_SIZE,height)) };
-			particles.emplace_back(Particle(0.001, LARGE_PARTICLE_SIZE, position, type));
+			particles.emplace_back(Particle(mass, LARGE_PARTICLE_SIZE, position, type));
+			heavy_particles.push_back(particles.size() - 1);
 		}
 		else if (type == PARTICLE_TYPE::LIGHT) {
-		
+			mass = SMALL_PARTICLE_MASS;
 			olc::vf2d position = { (float)(rand() % int(100 - rescale_length(2 * SMALL_PARTICLE_SIZE) - 2) + rescale_length(SMALL_PARTICLE_SIZE)) + 1, float(rand() % int(100 - rescale_height(2 * SMALL_PARTICLE_SIZE,height) - 2) + rescale_height(SMALL_PARTICLE_SIZE,height) + 1) };
-			particles.emplace_back(Particle(0.001, SMALL_PARTICLE_SIZE, position, type));
-		
+			particles.emplace_back(Particle(mass, SMALL_PARTICLE_SIZE, position, type));
+			light_particles.push_back(particles.size() - 1);
 		}
-
+		float speed = pow(energy * 2 / mass, 0.5);
+		olc::vf2d velocity = get_random_unit_vector() * speed;
 		particles.back().set_velocity(velocity);
-		particles.back().set_energy(pow(velocity.mag(),2) * 0.5 * particles.back().get_mass());
+		particles.back().set_energy(pow(velocity.mag(),2) * particles.back().get_mass());
 		//For debugging
 		particles.back().id = particle_count;
 
@@ -55,9 +63,13 @@ bool ParticleController::add_particle(PARTICLE_TYPE type) {
 /// </summary>
 /// <param name="temperature_add"></param>
 void ParticleController::increment_temperature(float temperature_add) {
-	temperature += temperature_add;
-	// 3/2 * boltzmann constant * temperature = energy (boltzmann constant edited)
-	delta_energy = delta_energy += (3 / 2) * 1.3806452 * pow(10, -1) * temperature_add;
+	
+	temperature = std::max(temperature + temperature_add, 0.0f);
+	temperature = std::min(temperature + temperature_add, 700.0f);
+	if (temperature + temperature_add < 700 && temperature + temperature_add > 0) {
+		// 3/2 * boltzmann constant * temperature = energy (boltzmann constant edited)
+		delta_energy = delta_energy += (3 / 2) * 5 * 1.3806452 * pow(10, -2) * temperature_add;
+	}	
 }
 
 
@@ -140,5 +152,24 @@ void ParticleController::correct_particles(int amount) {
 		olc::vf2d pos = { p.get_position().x,p.get_position().y + (((float)amount / (float)height) * 100 * (float)(height / (float)(WINDOW_HEIGHT * 0.4))) };
 
 		p.set_position(pos);
+	}
+}
+
+/// <summary>
+/// Remove particle of certain particle type
+/// </summary>
+/// <param name="type"></param>
+void ParticleController::remove_particle(PARTICLE_TYPE type) {
+	if (type == PARTICLE_TYPE::HEAVY) {
+		if (heavy_particles.size() > 0) {
+			particles.erase(particles.begin() + heavy_particles.back());
+			heavy_particles.pop_back();
+		}
+	}
+	if (type == PARTICLE_TYPE::LIGHT) {
+		if (light_particles.size() > 0) {
+			particles.erase(particles.begin() + light_particles.back());
+			light_particles.pop_back();
+		}
 	}
 }

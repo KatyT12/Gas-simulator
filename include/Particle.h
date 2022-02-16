@@ -49,7 +49,7 @@ public:
 	inline olc::vf2d get_velocity() { return velocity;}
 	
 	inline float get_kinetic_energy() { return kinetic_energy; }
-	inline void add_energy(float energy) { kinetic_energy += energy; }
+	inline void add_energy(float energy) { kinetic_energy = std::max(kinetic_energy + energy, 0.0f);}
 	inline void set_energy(float energy) { kinetic_energy = energy; }
 	
 	inline float get_mass() { return mass; }

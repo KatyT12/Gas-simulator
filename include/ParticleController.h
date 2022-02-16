@@ -43,15 +43,19 @@ private:
 	void update_particle_energies();
 	void check_collisions();
 	void handle_collisions(std::set<Collision>& collisions);
+	olc::vf2d get_random_unit_vector();
 public:
 	bool paused = false;
 	bool help_dialog = false;
 
 	int height;
 	std::vector<Particle> particles;
+	std::vector<int> heavy_particles;
+	std::vector<int> light_particles;
 
 	ParticleController(); //Constructor
 	bool add_particle(PARTICLE_TYPE type); //add particle to simulation
+	void remove_particle(PARTICLE_TYPE type);
 	void increment_temperature(float temperature_add);
 	inline float get_temperature() { return temperature; }
 	void correct_particles(int amount);
