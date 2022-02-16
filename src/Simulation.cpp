@@ -40,18 +40,25 @@ bool Simulation::OnUserUpdate(float fElapsedTime) {
 	return true;
 }
 
+
+
+
 void Simulation::CheckButtonPress(uint32_t action) {
 	olc::vi2d pos = GetMousePos();
-	for (Button& b : currentMode.buttons) {//For every button in the gui check if the coordinates of the mouse are on the button
+	bool found = false;
+	int i = 0;
+	while (!found && i < currentMode.buttons.size()) {//For every button in the gui check if the coordinates of the mouse are on the button
+		Button& b = currentMode.buttons[i];
 		if (pos.x > b.get_position().x && pos.x < b.get_position().x + b.get_size().x) {
 			if (pos.y > b.get_position().y && pos.y < b.get_position().y + b.get_size().y) {
-				if (action) { 
+				if (action) {
 					b.pressed(); //If that button was clicked run its corresponding method
 					b.clicked = true;
 				}
 				else b.clicked = false;
 			}
 		}
+		i++;
 	}
 }
 

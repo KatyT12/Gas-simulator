@@ -21,7 +21,7 @@ public:
 		addButton(Button({ position.x + 40, 200 }, { 200,30 }, olc::WHITE, "ADD HEAVY PARTICLE"));  
 		buttons[buttons.size() - 1].set_pressed_func([controller]() {controller->add_particle(PARTICLE_TYPE::HEAVY); }); 
 		addButton(Button({ position.x + 40, 250 }, { 200,30 }, olc::WHITE, "INCREASE TEMPERATURE"));
-		buttons[buttons.size()-1].set_pressed_func([controller]() {controller->increment_temperature(2); });
+		buttons[buttons.size()-1].set_pressed_func([controller]() {controller->increment_temperature(3); });
 		addButton(Button({ position.x + 40, 300 }, { 200,30 }, olc::WHITE, "INCREASE VOLUME"));
 		buttons[buttons.size() - 1].set_pressed_func([container]() {container->change_height(8); });
 		addButton(Button({ int(position.x + size.x / 2 - 200 / 2), 350 }, { 200,30 }, olc::WHITE, "PAUSE"));
@@ -32,7 +32,7 @@ public:
 		addButton(Button({ position.x + size.x - 240, 200 }, { 200,30 }, olc::WHITE, "REMOVE HEAVY PARTICLE"));  
 		buttons[buttons.size() - 1].set_pressed_func([controller]() {controller->remove_particle(PARTICLE_TYPE::HEAVY); }); 
 		addButton(Button({ position.x + size.x - 240, 250 }, { 200,30 }, olc::WHITE, "DECREASE TEMPERATURE"));
-		buttons[buttons.size() - 1].set_pressed_func([controller]() {controller->increment_temperature(-2); });
+		buttons[buttons.size() - 1].set_pressed_func([controller]() {controller->increment_temperature(-3); });
 		addButton(Button({ position.x + size.x - 240, 300 }, { 200,30 }, olc::WHITE, "DECREASE VOLUME"));
 		buttons[buttons.size() - 1].set_pressed_func([container]() {container->change_height(-8); });
 		

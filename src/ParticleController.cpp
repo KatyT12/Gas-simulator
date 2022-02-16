@@ -64,11 +64,20 @@ bool ParticleController::add_particle(PARTICLE_TYPE type) {
 /// <param name="temperature_add"></param>
 void ParticleController::increment_temperature(float temperature_add) {
 	
-	temperature = std::max(temperature + temperature_add, 0.0f);
-	temperature = std::min(temperature + temperature_add, 700.0f);
-	if (temperature + temperature_add < 700 && temperature + temperature_add > 0) {
+	float temp = temperature;
+	temperature += temperature_add;
+	temperature = std::max(temperature, 0.0f);
+	temperature = std::min(temperature, 700.0f);
+
+	if (temp + temperature_add < 700 && temp + temperature_add > 0) {
 		// 3/2 * boltzmann constant * temperature = energy (boltzmann constant edited)
-		delta_energy = delta_energy += (3 / 2) * 5 * 1.3806452 * pow(10, -2) * temperature_add;
+		for (Particle& p : particles) {
+			p.set_energy(p.get_kinetic_energy() * temperature/std::max(temp,1/temperature));
+			p.calc_velocity();
+			std::cout << p.get_kinetic_energy() << "\n";
+		
+		}
+		//delta_energy = delta_energy += (3 / 2) * 5 * 1.3806452 * pow(10, -2) * temperature_add;
 	}	
 }
 
@@ -115,6 +124,8 @@ void ParticleController::load_state(State& state) {
 	temperature = state.temperature;
 	// Remove current articles stored and aadd as many new ones ads required
 	particles.clear();
+	light_particles.clear();
+	heavy_particles.clear();
 	for (int p = 0; p < state.particle_count; p++) {
 		//In the future this may be edited to allow the state to specify an amount of light 
 		//and an amount of heavy particles to add
