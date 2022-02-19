@@ -23,7 +23,7 @@ public:
 	int id;
 
 	//Update the positions of each particle
-	void move(float seconds, int height);
+	bool move(float seconds, int height);
 
 	//Reverses velocity if either edge will be collided with
 	bool check_collision_with_container(olc::vf2d pos, int height);

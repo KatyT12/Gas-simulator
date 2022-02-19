@@ -8,6 +8,7 @@
 #include <Particle.h>
 #include <Gui.h>
 #include <testGui.h>
+#include <BoylesMode.h>
 
 //Header files from the standard library
 #include <chrono> //Will be used for timing each frame
@@ -38,5 +39,5 @@ private:
 	void CheckButtonPress(uint32_t action);
 
 	std::chrono::time_point<std::chrono::steady_clock> last_frame; // The variable to hold the time point of the last frame
-	Gui currentMode; //The current interface in use
+	Gui* currentMode; //The current interface in use
 };

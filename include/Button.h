@@ -16,15 +16,21 @@ private:
 	olc::Pixel colour;
 	std::string text;
 	olc::Pixel text_colour = olc::BLACK;
+	
 
 	//Procedure that will be called when the button is clicked
 	std::function<void(void)> func;
 public:
 	bool clicked = false;
+	CONSTANT constant = CONSTANT::OTHER;
 	Button(){}
 
 	Button(olc::vi2d position, olc::vi2d size, olc::Pixel colour, std::string text)
 	:position(position), size(size), colour(colour), text(text){}
+
+	Button(olc::vi2d position, olc::vi2d size, olc::Pixel colour, std::string text, CONSTANT constant)
+		:position(position), size(size), colour(colour), text(text), constant(constant) {}
+
 	Button(olc::vi2d position, olc::vi2d size, olc::Pixel colour, std::string text,olc::Pixel text_colour)
 		:position(position), size(size), colour(colour), text(text), text_colour(text_colour) {}
 	//Sets the function that the button will run. This should be done right after the instance is constructed

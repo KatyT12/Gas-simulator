@@ -20,6 +20,8 @@ struct TextDisplay {
 class Gui {
 public:
 	
+	State default_state;
+
 	std::vector<Button> buttons; //Buttons the mode will contain
 	std::vector<TextDisplay> text_displays;
 	//Position,size and colour on the window
@@ -32,15 +34,16 @@ public:
 		"The change mode button will change the mode the simulation\n\nis currently"
 		" in. Available modes are: Default, Boyles law,\n\nCharles law, the Pressure law"
 		" and Brownian motion.\n\n\n\n");
+	virtual void adjustments(CONSTANT constant) { return; }
 	//An empty constructor to initialize the class before constructing it
 	Gui() {};
 protected:
 	
 	//Constructor
-	Gui(olc::Pixel colour, ParticleController* controller, Container* container) : colour(colour), controller(controller) {
+	Gui(olc::Pixel colour, ParticleController* controller, Container* container,State default_state) : colour(colour), controller(controller), container(container),default_state(default_state) {
 		addButton(Button({ position.x - 3, 40 }, { 150,30 }, olc::Pixel(154, 164, 179), "RESET",olc::WHITE));
 		//Define the state to reset to: temperature of 30, height of 0.4* window width and 1 particle in the simulation.
-		State Reset_state = { 303.15,0.4 * WINDOW_HEIGHT,1 };
+		State Reset_state = default_state;
 		//Set the button to call the container.load_state() method
 		buttons[buttons.size() - 1].set_pressed_func([container, Reset_state]() {container->load_state(Reset_state); });
 
@@ -65,6 +68,9 @@ protected:
 	}
 	//A reference to the controller is needed to access/alter the simulation
 	ParticleController* controller;
+	Container* container;
+
+
 };
 
 

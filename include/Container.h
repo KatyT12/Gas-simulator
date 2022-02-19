@@ -46,7 +46,7 @@ public:
 	/// </summary>
 	/// <param name="amount"></param>
 	void change_height(double amount) {
-		if (height + amount < 600 && height + amount> 100) {
+		if (height + amount < 600 && height + amount> 200) {
 			height = height += amount;
 			calculate_dimensions();
 			controller.height = height;

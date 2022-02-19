@@ -32,6 +32,13 @@ enum PARTICLE_TYPE
 	HEAVY
 };
 
+enum CONSTANT {
+	PARTICLE,
+	VOLUME,
+	TEMPERATURE,
+	OTHER
+};
+
 static olc::vi2d get_screen_coords(olc::vf2d position, int height) {
 	olc::vi2d ret = { int(position.x / 100 * CONTAINER_WIDTH * WINDOW_WIDTH),int(position.y / (100 * (height / (0.4 * WINDOW_HEIGHT))) * height) };
 	ret = { int(ret.x + CONTAINER_X_POS * WINDOW_WIDTH),int(ret.y + WINDOW_HEIGHT - (CONTAINER_MIN_Y_POS * WINDOW_HEIGHT + height)) };

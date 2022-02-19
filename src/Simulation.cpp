@@ -3,11 +3,11 @@
 Simulation::Simulation() {
 	sAppName = "Simulation"; //Setting the title of the window
 	last_frame = std::chrono::high_resolution_clock::now(); //The time of the applications intitialization
-	currentMode = testMode(container.get_controller(),&container); //Setting the current interface (Would be the default)
+	currentMode =  new BoylesMode(container.get_controller(),&container); //Setting the current interface (Would be the default)
 }
 
 bool Simulation::OnUserCreate() {
-	container.get_controller()->add_particle(PARTICLE_TYPE::LIGHT); //Add a particle to the simulation
+	container.load_state(currentMode->default_state);
 	return true; //Simulation has successfully been created
 }
 
@@ -26,6 +26,7 @@ bool Simulation::OnUserUpdate(float fElapsedTime) {
 	DrawContainer(); 
 	DrawGui();
 	DrawParticles();
+	
 	
 
 	if (GetMouse(0).bPressed) {
@@ -47,13 +48,14 @@ void Simulation::CheckButtonPress(uint32_t action) {
 	olc::vi2d pos = GetMousePos();
 	bool found = false;
 	int i = 0;
-	while (!found && i < currentMode.buttons.size()) {//For every button in the gui check if the coordinates of the mouse are on the button
-		Button& b = currentMode.buttons[i];
+	while (!found && i < currentMode->buttons.size()) {//For every button in the gui check if the coordinates of the mouse are on the button
+		Button& b = currentMode->buttons[i];
 		if (pos.x > b.get_position().x && pos.x < b.get_position().x + b.get_size().x) {
 			if (pos.y > b.get_position().y && pos.y < b.get_position().y + b.get_size().y) {
 				if (action) {
 					b.pressed(); //If that button was clicked run its corresponding method
 					b.clicked = true;
+					currentMode->adjustments(b.constant);
 				}
 				else b.clicked = false;
 			}
@@ -61,8 +63,6 @@ void Simulation::CheckButtonPress(uint32_t action) {
 		i++;
 	}
 }
-
-
 
 void Simulation::DrawContainer() {
 	//Recieve the necessary fields of the container to draw it
@@ -78,13 +78,13 @@ void  Simulation::DrawGuiRectangle(olc::vi2d pos, olc::vi2d size,olc::vi2d borde
 }
 
 void Simulation::DrawGui() {
-	olc::vi2d pos = currentMode.position;
-	olc::vi2d size = currentMode.size;
+	olc::vi2d pos = currentMode->position;
+	olc::vi2d size = currentMode->size;
 
-	std::string mode_string = "Current Mode: " + currentMode.name;
+	std::string mode_string = "Current Mode: " + currentMode->name;
 	DrawStringDecal({ int(((0.57 * WINDOW_WIDTH) - 200) / 2 + 0.4 * WINDOW_WIDTH), 10 }, mode_string, olc::BLACK);
 
-	DrawGuiRectangle(pos, size, { pos.x - 4,pos.y - 4 }, { size.x + 8,size.y + 8 }, currentMode.colour);
+	DrawGuiRectangle(pos, size, { pos.x - 4,pos.y - 4 }, { size.x + 8,size.y + 8 }, currentMode->colour);
 
 
 	DrawGuiRectangle({ int(pos.x + 0.03 * size.x), int(pos.y + 0.6 * size.y) }, { int(size.x * 0.94), int(size.y * 0.37)
@@ -92,7 +92,7 @@ void Simulation::DrawGui() {
 	
 	
 
-	for (Button& b : currentMode.buttons) {
+	for (Button& b : currentMode->buttons) {
 		DrawButton(b);
 	}
 	DrawTextDisplays();
@@ -121,7 +121,7 @@ void Simulation::DrawButton(Button b) {
 /// Draw each text display onto the screen
 /// </summary>
 void Simulation::DrawTextDisplays() {
-	for (TextDisplay& td : currentMode.text_displays) {
+	for (TextDisplay& td : currentMode->text_displays) {
 		//Calculate length needed to fit text
 		olc::vi2d size = { (int(td.title.length() + td.func().length() + td.unit.length()) + 1) * 8 + 20,30 };
 		//Draw dimensions
@@ -140,7 +140,7 @@ void Simulation::DrawHelpDialog() {
 		FillRectDecal({ 20,20 }, { 500,300 }, olc::BLACK);
 		FillRectDecal({ 24,24 }, { 492,292 }, olc::WHITE);
 		//Draw text
-		DrawStringDecal({ 30,30 }, currentMode.help_text, olc::BLACK, {1.0f,1.0f});
+		DrawStringDecal({ 30,30 }, currentMode->help_text, olc::BLACK, {1.0f,1.0f});
 	}
 }
 

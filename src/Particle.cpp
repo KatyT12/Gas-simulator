@@ -1,10 +1,10 @@
 #include <Particle.h>
 
 
-void Particle::move(float seconds, int height) {
-	check_collision_with_container({ position.x + (seconds * velocity.x), position.y + (seconds * velocity.y) }, height);
+bool Particle::move(float seconds, int height) {
+	bool collision = check_collision_with_container({ position.x + (seconds * velocity.x), position.y + (seconds * velocity.y) }, height);
 	position = { position.x + (seconds * velocity.x), position.y + (seconds * velocity.y) };
-
+	return collision;
 }
 
 //Reverses velocity if either edge will be collided with
@@ -42,10 +42,10 @@ bool Particle::check_collision_with_particle(Particle p, float seconds, int heig
 	return false;
 }
 
-void Particle::handle_collision(Particle* p, float seconds, olc::vf2d velocity2) {
+void Particle::handle_collision(Particle* p, float time, olc::vf2d velocity2) {
 	//Next position of the two particles
-	olc::vf2d pos = { position.x + (seconds * velocity.x), position.y + (seconds * velocity.y) };
-	olc::vf2d pos1 = { p->position.x + (seconds * velocity2.x), p->position.y + (seconds * velocity2.y) };
+	olc::vf2d pos = { position.x + (time * velocity.x), position.y + (time * velocity.y) };
+	olc::vf2d pos1 = { p->position.x + (time * velocity2.x), p->position.y + (time * velocity2.y) };
 
 	//Vectors needed in equation
 	olc::vf2d vec = pos - pos1;
