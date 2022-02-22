@@ -13,7 +13,9 @@ private:
 	float width, posX, posY, area, height;
 	ParticleController controller;
 public:
-	
+
+	bool change_mode = false;
+
 	Container() {
 		//Setting the position and size of the container
 		posX = CONTAINER_X_POS * WINDOW_WIDTH;

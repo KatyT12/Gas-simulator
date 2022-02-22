@@ -7,8 +7,10 @@
 #include <Button.h> 
 #include <Particle.h>
 #include <Gui.h>
-#include <testGui.h>
+#include <DefaultMode.h>
 #include <BoylesMode.h>
+#include <CharlesMode.h>
+#include <PressureMode.h>
 
 //Header files from the standard library
 #include <chrono> //Will be used for timing each frame
@@ -21,11 +23,13 @@ class Simulation : public olc::PixelGameEngine //Public inheritance
 public:
 	Container container;
 	Simulation();
-public:
 	//Overriding functions of the PixelGameEngine
 	bool OnUserCreate() override;  // Runs once when the simulation is created
 	bool OnUserUpdate(float fElapsedTime) override; //Runs every update of the simulation (every frame)
 private:
+	//Only two modes for now
+	Gui* modes[4];
+	int mode_index = 0;
 	//Drawing methods
 	void DrawContainer();
 	void DrawGui();
@@ -35,7 +39,7 @@ private:
 	void DrawParticle(Particle p);
 	void DrawHelpDialog();
 	void DrawGuiRectangle(olc::vi2d pos, olc::vi2d size, olc::vi2d border_pos, olc::vi2d border_size,olc::Pixel colour);
-
+	void ChangeMode();
 	void CheckButtonPress(uint32_t action);
 
 	std::chrono::time_point<std::chrono::steady_clock> last_frame; // The variable to hold the time point of the last frame

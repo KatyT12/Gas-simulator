@@ -18,6 +18,8 @@ void ParticleController::update() {
 	}
 	
 	calc_collisions_per_second();
+	average_ke_heavy_particles = get_average_kinetic_energy(PARTICLE_TYPE::HEAVY);
+	average_ke_light_particles = get_average_kinetic_energy(PARTICLE_TYPE::LIGHT);
 }
 
 olc::vf2d ParticleController::get_random_unit_vector() {
@@ -110,14 +112,16 @@ bool ParticleController::add_particle(PARTICLE_TYPE type) {
 /// <param name="temperature_add"></param>
 void ParticleController::increment_temperature(float temperature_add) {
 	
+	
 	float temp = temperature;
 	temperature += temperature_add;
-	temperature = std::max(temperature, 0.0f);
+	temperature = std::max(temperature, 1.0f);
 	temperature = std::min(temperature, 700.0f);
 
-	if (temp + temperature_add < 700 && temp + temperature_add > 0) {
+	if (temp != temperature) {
 		// 3/2 * boltzmann constant * temperature = energy (boltzmann constant edited)
 		for (Particle& p : particles) {
+			
 			p.set_energy(p.get_kinetic_energy() * temperature/std::max(temp,1/temperature));
 			p.calc_velocity();
 			
@@ -150,9 +154,6 @@ void ParticleController::check_collisions() {
 }
 
 void ParticleController::handle_collisions(std::set<Collision>& collisions) {
-
-
-
 	for (auto& collision : collisions) {
 		auto a = collision.a;
 		auto b = collision.b;
@@ -264,35 +265,27 @@ void ParticleController::remove_particle(PARTICLE_TYPE type) {
 	}
 }
 
+/// <summary>
+/// Adjust volume according to temperature proportionally
+/// </summary>
 float ParticleController::adjust_volume(CONSTANT constant) {
 	float height_change = 0;
-	if (constant == CONSTANT::TEMPERATURE) {
-		height_change = 600 - ((float)particles.size() / (float)MAX_PARTICLES_NUM) * (float)400 - height;
-	}
+	height_change =  (400 * temperature / 700) - height + 200;
 	return height_change;
 }
+/// <summary>
+/// Adjust temperature according to volume
+/// </summary>
+float ParticleController::adjust_temperature(CONSTANT constant) {
+	float temperature_change = 0;
+	
+	temperature_change = (((float)height-200) / 400.0f) * 700.0f - temperature;
+	return temperature_change;
+}
 
-int ParticleController::adjust_particles(CONSTANT constant) {
-	int particle_change = 0;
-	if (constant == TEMPERATURE) {
-		particle_change = (1.0f - ((float)height - 200) / (float)400) * MAX_PARTICLES_NUM - particles.size();
-	}
-	std::cout << particle_change << "\n";
-
-	if (particle_change < 0) {
-		while (particle_change < 0 && light_particles.size() > 0) {
-			remove_particle(PARTICLE_TYPE::LIGHT);
-			particle_change++;
-		}
-		while (particle_change < 0 && heavy_particles.size() > 0) {
-			remove_particle(PARTICLE_TYPE::HEAVY);
-			particle_change++;
-		}
-	}
-	else {
-		for (int i = 0; i < particle_change; i++) {
-			add_particle(PARTICLE_TYPE::LIGHT);
-		}
-	}
-	return particle_change;
+float ParticleController::calc_pressure() {
+	float average_ke = (average_ke_heavy_particles + average_ke_light_particles)/2;
+	
+	float pressure = average_ke *1/4 * collisions_per_second;
+	return pressure;
 }

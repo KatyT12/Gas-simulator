@@ -51,7 +51,8 @@ public:
 	bool paused = false;
 	bool help_dialog = false;
 	float collisions_per_second = 0;
-	
+	float average_ke_light_particles;
+	float average_ke_heavy_particles;
 
 	int height;
 	std::vector<Particle> particles;
@@ -72,5 +73,6 @@ public:
 		
 	void calc_collisions_per_second();
 	float adjust_volume(CONSTANT constant);
-	int adjust_particles(CONSTANT constant);
+	float adjust_temperature(CONSTANT constant);
+	float calc_pressure();
 };

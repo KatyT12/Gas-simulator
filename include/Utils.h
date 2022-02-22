@@ -36,7 +36,8 @@ enum CONSTANT {
 	PARTICLE,
 	VOLUME,
 	TEMPERATURE,
-	OTHER
+	OTHER,
+	NONE
 };
 
 static olc::vi2d get_screen_coords(olc::vf2d position, int height) {

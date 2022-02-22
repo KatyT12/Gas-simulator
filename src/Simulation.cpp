@@ -3,7 +3,13 @@
 Simulation::Simulation() {
 	sAppName = "Simulation"; //Setting the title of the window
 	last_frame = std::chrono::high_resolution_clock::now(); //The time of the applications intitialization
-	currentMode =  new BoylesMode(container.get_controller(),&container); //Setting the current interface (Would be the default)
+
+	//Initialize modes
+	modes[0] = new DefaultMode(container.get_controller(), &container);
+	modes[1] = new BoylesMode(container.get_controller(), &container);
+	modes[2] = new CharlesMode(container.get_controller(), &container);
+	modes[3] = new PressureMode(container.get_controller(), &container);
+	currentMode = modes[mode_index]; 
 }
 
 bool Simulation::OnUserCreate() {
@@ -36,13 +42,24 @@ bool Simulation::OnUserUpdate(float fElapsedTime) {
 		CheckButtonPress(0);
 	}
 	
+	if (container.change_mode) {
+		ChangeMode();
+	}
+
 	container.get_controller()->set_time_between_frames(fElapsedTime);
 
 	return true;
 }
 
-
-
+/// <summary>
+/// Switch to next mode in the array
+/// </summary>
+void Simulation::ChangeMode() {
+	mode_index = (mode_index + 1) % 4;
+	currentMode = modes[mode_index];
+	container.load_state(currentMode->default_state);
+	container.change_mode = false;
+}
 
 void Simulation::CheckButtonPress(uint32_t action) {
 	olc::vi2d pos = GetMousePos();
@@ -52,7 +69,7 @@ void Simulation::CheckButtonPress(uint32_t action) {
 		Button& b = currentMode->buttons[i];
 		if (pos.x > b.get_position().x && pos.x < b.get_position().x + b.get_size().x) {
 			if (pos.y > b.get_position().y && pos.y < b.get_position().y + b.get_size().y) {
-				if (action) {
+				if (action && b.constant != currentMode->const_variable) {
 					b.pressed(); //If that button was clicked run its corresponding method
 					b.clicked = true;
 					currentMode->adjustments(b.constant);
@@ -89,8 +106,11 @@ void Simulation::DrawGui() {
 
 	DrawGuiRectangle({ int(pos.x + 0.03 * size.x), int(pos.y + 0.6 * size.y) }, { int(size.x * 0.94), int(size.y * 0.37)
 		}, { int(pos.x - 2 + 0.03 * size.x), int(pos.y - 2 + 0.6 * size.y) }, { int(4 + size.x * 0.94), int(size.y * 0.37) + 4 }, olc::Pixel(47, 101, 133));
-	
-	
+
+	pos = { 1100,635 };
+	DrawStringDecal(pos, "Pressure");
+	int pressure_length = container.get_controller()->calc_pressure();
+	DrawGuiRectangle({ 1006,650 }, { std::min(pressure_length / 2,250),30 }, { 1004,648 }, { 254,34 }, olc::RED);
 
 	for (Button& b : currentMode->buttons) {
 		DrawButton(b);
@@ -105,7 +125,8 @@ void Simulation::DrawButton(Button b) {
 	olc::vi2d size = b.get_size();
 
 	olc::Pixel colour = b.get_color();
-	if (b.clicked) {
+	//If button has been clicked or would edit constant variable, grey out
+	if (b.clicked || currentMode->const_variable == b.constant) {
 		colour = b.get_color() - olc::Pixel(50, 50, 50);
 	}
 
@@ -123,9 +144,9 @@ void Simulation::DrawButton(Button b) {
 void Simulation::DrawTextDisplays() {
 	for (TextDisplay& td : currentMode->text_displays) {
 		//Calculate length needed to fit text
-		olc::vi2d size = { (int(td.title.length() + td.func().length() + td.unit.length()) + 1) * 8 + 20,30 };
+		olc::vi2d size = td.size;
 		//Draw dimensions
-		DrawGuiRectangle(td.pos, size, { td.pos.x - 2, td.pos.y - 2 }, { size.x + 4,size.y + 4 }, olc::Pixel(240, 240, 240));
+		DrawGuiRectangle(td.pos, size, { td.pos.x - 2, td.pos.y - 2 }, { size.x + 4,size.y + 4 }, olc::Pixel(237, 239, 227));
 		// Concatenate the text that will be displated
 		std::string str = td.title + ": " + td.func() + td.unit;
 		//Draw the text
