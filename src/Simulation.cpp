@@ -9,6 +9,7 @@ Simulation::Simulation() {
 	modes[1] = new BoylesMode(container.get_controller(), &container);
 	modes[2] = new CharlesMode(container.get_controller(), &container);
 	modes[3] = new PressureMode(container.get_controller(), &container);
+	modes[4] = new BrownianMode(container.get_controller(), &container);
 	currentMode = modes[mode_index]; 
 }
 
@@ -55,7 +56,7 @@ bool Simulation::OnUserUpdate(float fElapsedTime) {
 /// Switch to next mode in the array
 /// </summary>
 void Simulation::ChangeMode() {
-	mode_index = (mode_index + 1) % 4;
+	mode_index = (mode_index + 1) % 5;
 	currentMode = modes[mode_index];
 	container.load_state(currentMode->default_state);
 	container.change_mode = false;
@@ -111,6 +112,7 @@ void Simulation::DrawGui() {
 	DrawStringDecal(pos, "Pressure");
 	int pressure_length = container.get_controller()->calc_pressure();
 	DrawGuiRectangle({ 1006,650 }, { std::min(pressure_length / 2,250),30 }, { 1004,648 }, { 254,34 }, olc::RED);
+	
 
 	for (Button& b : currentMode->buttons) {
 		DrawButton(b);
@@ -131,7 +133,7 @@ void Simulation::DrawButton(Button b) {
 	}
 
 
-	DrawGuiRectangle(pos, size, { pos.x - 1,int(pos.y - 1) }, { size.x + 4,size.y + 4 }, colour);
+	DrawGuiRectangle(pos, size, { pos.x - 1,int(pos.y - 1) }, { size.x + 5,size.y + 5 }, colour);
 	DrawRect(pos, size, olc::BLACK);
 	olc::vi2d position = { pos.x + (size.x - int(b.get_text().length() * 8)) / 2,pos.y + size.y / 2 };
 	DrawStringDecal(position, b.get_text(), b.get_text_colour(), olc::vf2d{ 1.0f,1.0f });
@@ -143,12 +145,15 @@ void Simulation::DrawButton(Button b) {
 /// </summary>
 void Simulation::DrawTextDisplays() {
 	for (TextDisplay& td : currentMode->text_displays) {
-		//Calculate length needed to fit text
+
+		std::string unit = td.unit;
+		if (!(container.get_controller()->use_kelvin) && td.title == "Temperature")unit = 'C';
+		
 		olc::vi2d size = td.size;
 		//Draw dimensions
 		DrawGuiRectangle(td.pos, size, { td.pos.x - 2, td.pos.y - 2 }, { size.x + 4,size.y + 4 }, olc::Pixel(237, 239, 227));
 		// Concatenate the text that will be displated
-		std::string str = td.title + ": " + td.func() + td.unit;
+		std::string str = td.title + ": " + td.func() + unit;
 		//Draw the text
 		olc::vi2d position = { td.pos.x + (size.x - int((int)str.length() * 8)) / 2,td.pos.y + size.y / 2 };
 		DrawStringDecal(position, str, olc::BLACK);
@@ -174,10 +179,20 @@ void Simulation::DrawParticles() {
 }
 void Simulation::DrawParticle(Particle p) {
 	//get the position of the particle
+	olc::vi2d pos = get_screen_coords({ p.get_position() }, container.get_height());
 	
-	olc::vi2d pos = get_screen_coords({p.get_position()},container.get_height());
+	olc::Pixel colour;
+	if (container.get_controller()->colour_particles) {
+		colour = container.get_controller()->get_particle_colour(p);
+	}
+	else {
+		colour = olc::GREEN;
+	}
+	if (p.get_type() == PARTICLE_TYPE::VERY_HEAVY) {
+		colour = olc::Pixel(170, 117, 209);
+	}
+	
 	//Draw the particle
-	
-	FillCircle(pos, p.get_radius() , olc::GREEN);
+	FillCircle(pos, p.get_radius() , colour);
 }
 

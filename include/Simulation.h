@@ -11,6 +11,7 @@
 #include <BoylesMode.h>
 #include <CharlesMode.h>
 #include <PressureMode.h>
+#include <BrownianMode.h>
 
 //Header files from the standard library
 #include <chrono> //Will be used for timing each frame
@@ -28,7 +29,7 @@ public:
 	bool OnUserUpdate(float fElapsedTime) override; //Runs every update of the simulation (every frame)
 private:
 	//Only two modes for now
-	Gui* modes[4];
+	Gui* modes[5];
 	int mode_index = 0;
 	//Drawing methods
 	void DrawContainer();

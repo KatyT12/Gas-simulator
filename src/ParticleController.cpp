@@ -4,22 +4,43 @@
 //Constructor
 ParticleController::ParticleController() :particle_count(0) {
 	srand(time(NULL)); //The time is used so it is different everytime the application is run
+	
+	colours[0] = olc::Pixel(161,0,0);
+	colours[1] = olc::Pixel(176, 0, 0);
+	colours[2] = olc::Pixel(192, 46, 0);
+	colours[3] = olc::Pixel(208, 98, 0);
+	colours[4] = olc::Pixel(224, 148, 0);
+	colours[5] = olc::Pixel(239, 192, 0);
+	colours[6] = olc::Pixel(255, 229, 0);
+	colours[7] = olc::Pixel(255, 238, 40);
+	colours[8] = olc::Pixel(255, 245, 79);
+	colours[9] = olc::Pixel(255, 250, 119);
+	colours[10] = olc::Pixel(255, 254, 158);
+	colours[11] = olc::Pixel(255, 255, 198);
+	colours[12] = olc::Pixel(254,255,237);
 }
 
-//Update simulation
+/// <summary>
+/// This method is ran each frame and is what updates the
+/// simulation. Is not ran when the simulation is paused.
+/// </summary>
 void ParticleController::update() {
 	check_collisions(); //Check and handle particle collisions
 	for (Particle& p : particles) {
 		bool collision = p.move(time_between_frames,height); //Move each particle
+		//Increment collision counter
 		if (collision) collision_counter += 1;
 	}
-	if (delta_energy != 0) {
-		update_particle_energies();
-	}
 	
+	//calculate statistics
 	calc_collisions_per_second();
 	average_ke_heavy_particles = get_average_kinetic_energy(PARTICLE_TYPE::HEAVY);
 	average_ke_light_particles = get_average_kinetic_energy(PARTICLE_TYPE::LIGHT);
+	average_ke_all_particles = get_average_kinetic_energy(PARTICLE_TYPE::ANY);
+
+	if (colour_particles) {
+		update_particle_z_value(calc_standard_deviation());
+	}
 }
 
 olc::vf2d ParticleController::get_random_unit_vector() {
@@ -38,29 +59,6 @@ void ParticleController::calc_collisions_per_second() {
 	}
 }
 
-/// <summary>
-///  Calculate average kinetic energy for given particle type
-/// </summary>
-/// <param name="type"></param>
-/// <returns></returns>
-float ParticleController::get_average_kinetic_energy(PARTICLE_TYPE type) {
-	std::vector<int> particle_indexes;
-	if (type == PARTICLE_TYPE::LIGHT) { particle_indexes = light_particles;}
-	else { particle_indexes = heavy_particles;}
-
-	float total = 0;
-	for (int index : particle_indexes) {
-		total += particles[index].get_kinetic_energy();
-	}
-	
-	if (particle_indexes.size() > 0) {
-		return total / particle_indexes.size();
-	}
-	else {
-		return 0;
-	}
-	
-}
 
 /// <summary>
 /// Add a particle to the simulation of one of 
@@ -86,6 +84,10 @@ bool ParticleController::add_particle(PARTICLE_TYPE type) {
 			mass = SMALL_PARTICLE_MASS;
 			size = SMALL_PARTICLE_SIZE;
 			light_particles.push_back(particles.size());
+		}
+		else if (type == PARTICLE_TYPE::VERY_HEAVY) {
+			mass = VERY_LARGE_PARTICLE_MASS;
+			size = VERY_LARGE_PARTICLE_SIZE;
 		}
 		olc::vf2d position = { (float)(rand() % int(100 - rescale_length(2 * size)-3) + rescale_length(size)+1), float(rand() % 55 + 10) };
 		particles.emplace_back(Particle(mass, size, position, type));
@@ -119,15 +121,11 @@ void ParticleController::increment_temperature(float temperature_add) {
 	temperature = std::min(temperature, 700.0f);
 
 	if (temp != temperature) {
-		// 3/2 * boltzmann constant * temperature = energy (boltzmann constant edited)
 		for (Particle& p : particles) {
 			
 			p.set_energy(p.get_kinetic_energy() * temperature/std::max(temp,1/temperature));
 			p.calc_velocity();
-			
-		
 		}
-		//delta_energy = delta_energy += (3 / 2) * 5 * 1.3806452 * pow(10, -2) * temperature_add;
 	}	
 }
 
@@ -180,36 +178,17 @@ void ParticleController::load_state(State& state) {
 	particles.clear();
 	light_particles.clear();
 	heavy_particles.clear();
-	for (int p = 0; p < state.particle_count; p++) {
-		//In the future this may be edited to allow the state to specify an amount of light 
-		//and an amount of heavy particles to add
+	for (int p = 0; p < state.light_particle_count; p++) {
 		add_particle(PARTICLE_TYPE::LIGHT);
 	}
-}
-
-
-
-/// <summary>
-/// Update the enrgy of particles according to temperature change.
-/// Done in each frame after a change in temperature until there is no change to
-/// be done
-/// </summary>
-void ParticleController::update_particle_energies() {
-	//delta energy is the change in energy that needs to be done
-	//calculates energy to add/subtract this frame
-	float energy = delta_energy * time_between_frames * 100;
-	delta_energy = delta_energy - energy;
-
-	//Alter energy of particles and recalculate their velocities
-	for (Particle& p : particles) {
-		p.add_energy(energy);
-		p.calc_velocity();
+	for (int p = 0; p < state.heavy_particle_count; p++) {
+		add_particle(PARTICLE_TYPE::HEAVY);
 	}
-	//If the magnitude of the energy left to add is less than a very small number set it to 0
-	if (std::pow(std::pow(delta_energy, 2), 0.5) < 0.0000001) {
-		delta_energy = 0;
+	for (int p = 0; p < state.very_heavy_particle_count; p++) {
+		add_particle(PARTICLE_TYPE::VERY_HEAVY);
 	}
 }
+
 
 /// <summary>
 /// To be ran when volume changes.
@@ -221,9 +200,10 @@ void ParticleController::correct_particles(int amount) {
 	for (Particle& p : particles) {
 		olc::vf2d pos = { p.get_position().x,p.get_position().y + (((float)amount / (float)height) * 100 * (float)(height / (float)(WINDOW_HEIGHT * 0.4))) };
 		//If the volume has decreased, particles that would be moved above the container should be moved down and not corrected
-		if (p.get_position().y>p.get_radius()){
+		if (p.get_position().y>p.get_radius()*2){
 			p.set_position(pos);
 		}
+		
 	}
 }
 
@@ -284,8 +264,108 @@ float ParticleController::adjust_temperature(CONSTANT constant) {
 }
 
 float ParticleController::calc_pressure() {
-	float average_ke = (average_ke_heavy_particles + average_ke_light_particles)/2;
 	
-	float pressure = average_ke *1/4 * collisions_per_second;
+	float pressure = average_ke_all_particles *1/9 * collisions_per_second;
 	return pressure;
+}
+
+/// <summary>
+///  Calculate average kinetic energy for given particle type
+/// </summary>
+/// <param name="type"></param>
+/// <returns></returns>
+float ParticleController::get_average_kinetic_energy(PARTICLE_TYPE type) {
+	std::vector<int> particle_indexes;
+	float total = 0;
+	if (type == PARTICLE_TYPE::LIGHT) { particle_indexes = light_particles; }
+	else if (type == PARTICLE_TYPE::HEAVY) { particle_indexes = heavy_particles; }
+
+	else if (type == PARTICLE_TYPE::ANY && particles.size() > 0) {
+		for (Particle& p : particles) {
+			total += p.get_kinetic_energy();
+		}
+		total /= particles.size();
+		return total;
+	}
+
+	for (int index : particle_indexes) {
+		total += particles[index].get_kinetic_energy();
+	}
+
+
+	if (particle_indexes.size() > 0) {
+		return total / particle_indexes.size();
+	}
+	else {
+		return 0;
+	}
+
+}
+
+/// <summary>
+/// z values - number of standard deviations away from the mean
+/// this method updates the z values of each particle
+/// </summary>
+/// <param name="standard_deviation"></param>
+
+float ParticleController::calc_standard_deviation() {
+	float total = 0;
+	//Sum of squares
+	for (Particle& p : particles) {
+		total += pow(p.get_kinetic_energy(), 2);
+	}
+
+	float standard_deviation = std::pow(total / (float)particles.size() - std::pow(average_ke_all_particles,2),0.5);
+	return standard_deviation;
+}
+
+/// <summary>
+/// z values - number of standard deviations away from the mean
+/// this method updates the z values of each particle
+/// </summary>
+/// <param name="standard_deviation"></param>
+void ParticleController::update_particle_z_value(float standard_deviation) {
+	
+	for (Particle& p : particles) {
+		float z = p.get_kinetic_energy() - average_ke_all_particles;
+		if (standard_deviation > 0.00001) {
+			z /= standard_deviation;
+		}
+		p.z_value = z;
+	}
+}
+
+/// <summary>
+/// Find the colour of each particle based on the z value
+/// </summary>
+/// <param name="p"></param>
+/// <returns></returns>
+olc::Pixel ParticleController::get_particle_colour(Particle& p) {
+	//the index ranges from 0 to 12 so the max z value needs to be added to the z value to get in this range
+	float modified_z_value = std::max(p.z_value + MAX_Z_VALUE/2, 0.0f);
+	//Make sure the value is in range 0 <= z <= max_z_value
+	modified_z_value = std::min(modified_z_value, MAX_Z_VALUE);
+	//Divide by 12 and round it to the nearest integer to find the index 
+	int index = std::round(modified_z_value / (MAX_Z_VALUE/12));
+	index = std::min(std::max(index, 0),12);
+	return colours[index];
+}
+
+/// <summary>
+/// Caclulate average speed of particles 
+/// </summary>
+/// <returns></returns>
+float ParticleController::calc_rms() {
+	float total = 0;
+	for (Particle& p : particles) {
+		total += pow(p.get_velocity().mag(), 2);
+	}
+	//if particles.size() = 0 then the returned value would be infinity
+	if (particles.size() > 0) {
+		total /= particles.size();
+		return pow(total, 0.5);
+	}
+	else {
+		return 0;
+	}
 }

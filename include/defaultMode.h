@@ -8,7 +8,7 @@ public:
 	
 
 	//The controller and container is a needed to access the simulation
-	DefaultMode(ParticleController* controller, Container* container) : Gui(olc::Pixel(120, 183, 196), controller, container, { 309.0f,0.4 * WINDOW_HEIGHT,1 }) {
+	DefaultMode(ParticleController* controller, Container* container) : Gui(olc::Pixel(120, 183, 196), controller, container, { 309.0f,0.4 * WINDOW_HEIGHT,1,0,0 }) {
 
 		name = "Default Mode";
 		help_text += "Currently the simulation is in default mode. This means\n\n"

@@ -21,6 +21,7 @@ public:
 
 	//For debugging only
 	int id;
+	float z_value;
 
 	//Update the positions of each particle
 	bool move(float seconds, int height);
@@ -53,6 +54,6 @@ public:
 	inline void set_energy(float energy) { kinetic_energy = energy; }
 	
 	inline float get_mass() { return mass; }
-	
+	inline PARTICLE_TYPE get_type() { return type; }
 };
 

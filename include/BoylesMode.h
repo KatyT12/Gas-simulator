@@ -8,7 +8,7 @@ public:
 
 	
 	//The controller and container is a needed to access the simulation
-	BoylesMode(ParticleController* controller, Container* container) : Gui(olc::Pixel(27, 211, 131), controller, container, { 507,580,150 }) {
+	BoylesMode(ParticleController* controller, Container* container) : Gui(olc::Pixel(27, 211, 131), controller, container, { 507,580,150,0,0 }) {
 
 
 		name = "Boyles-Law  Mode";

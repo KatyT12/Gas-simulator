@@ -8,7 +8,7 @@ public:
 
 
 	//The controller and container is a needed to access the simulation
-	CharlesMode(ParticleController* controller, Container* container) : Gui(olc::Pixel(152, 135, 229), controller, container, { 309,370,150 }) {
+	CharlesMode(ParticleController* controller, Container* container) : Gui(olc::Pixel(152, 135, 229), controller, container, { 309,370,150,0,0 }) {
 
 
 		name = "Charles-Law  Mode";

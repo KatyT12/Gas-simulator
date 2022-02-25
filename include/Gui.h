@@ -52,10 +52,17 @@ protected:
 		addButton(Button({ int(2 * position.x + size.x - 150) / 2, 40 }, { 150,30 }, olc::Pixel(154, 164, 179), "HELP", olc::WHITE));
 		buttons[buttons.size() - 1].set_pressed_func([controller]() {controller->help_dialog = !controller->help_dialog; });
 
-		addButton(Button({ int(position.x + size.x - 149) , 40 }, { 150,30 }, olc::Pixel(154, 164, 179), "CHANGE MODE", olc::WHITE));
+		addButton(Button({ int(position.x + size.x - 149) , 40 }, { 150,30 }, olc::Pixel(154, 164, 179), "CHANGE MODE", olc::WHITE)); 
 		buttons[buttons.size() - 1].set_pressed_func([container]() {container->change_mode = true; });
 
+		addButton(Button({ 1000, 500 }, { 250,30 }, olc::WHITE, "TOGGLE PARTICLES COLOUR SCALE"));
+		buttons[buttons.size() - 1].set_pressed_func([controller]() {controller->colour_particles = !controller->colour_particles; });
+
+		addButton(Button({ 1000, 550 }, { 250,30 }, olc::WHITE, "TOGGLE TEMPERATURE UNIT"));
+		buttons[buttons.size() - 1].set_pressed_func([controller]() {controller->use_kelvin = !controller->use_kelvin; });
+
 		add_variable_buttons(controller, container);
+		add_text_displays(controller, container);
 	}
 
 	/// <summary>
@@ -80,7 +87,7 @@ protected:
 		addButton(Button({ position.x + 40, 250 }, { 200,30 }, olc::WHITE, "INCREASE TEMPERATURE", CONSTANT::TEMPERATURE));
 		buttons[buttons.size() - 1].set_pressed_func([controller]() {controller->increment_temperature(9); });
 		addButton(Button({ position.x + 40, 300 }, { 200,30 }, olc::WHITE, "INCREASE VOLUME", CONSTANT::VOLUME));
-		buttons[buttons.size() - 1].set_pressed_func([container]() {container->change_height(8); });
+		buttons[buttons.size() - 1].set_pressed_func([container]() {container->change_height(16); });
 		addButton(Button({ int(position.x + size.x / 2 - 200 / 2), 350 }, { 200,30 }, olc::WHITE, "PAUSE"));
 		buttons[buttons.size() - 1].set_pressed_func([controller]() {controller->paused = !controller->paused; });
 
@@ -91,12 +98,21 @@ protected:
 		addButton(Button({ position.x + size.x - 240, 250 }, { 200,30 }, olc::WHITE, "DECREASE TEMPERATURE", CONSTANT::TEMPERATURE));
 		buttons[buttons.size() - 1].set_pressed_func([controller]() {controller->increment_temperature(-9); });
 		addButton(Button({ position.x + size.x - 240, 300 }, { 200,30 }, olc::WHITE, "DECREASE VOLUME", CONSTANT::VOLUME));
-		buttons[buttons.size() - 1].set_pressed_func([container]() {container->change_height(-3); });
+		buttons[buttons.size() - 1].set_pressed_func([container]() {container->change_height(-16); });
 
 
-		//Display temperature
-		TextDisplay temperature_display = { { int(position.x + size.x / 2 - 200 / 2),250} ,{200,30},[controller]() {
-			return std::to_string((int)controller->get_temperature()) + "." + (std::to_string(controller->get_temperature() - (int)controller->get_temperature())).substr(2,2); },
+	};
+
+
+	void add_text_displays(ParticleController* controller,Container* container) {
+
+		//Display temperature	
+		TextDisplay temperature_display;
+		temperature_display = { { int(position.x + size.x / 2 - 200 / 2),250} ,{200,30},[controller]() {
+			float temperature = controller->get_temperature();
+			//convert to celsius if necessary
+			if (!controller->use_kelvin)temperature -= 272.15;
+			return std::to_string((int)temperature)+ "." + (std::to_string(temperature - (int)temperature)).substr(2,2); },
 			"K","Temperature" };
 		addTextDisplay(temperature_display);
 
@@ -109,13 +125,18 @@ protected:
 		addTextDisplay(NoOfHeavyParticles);
 
 		TextDisplay volume_display = { {int(position.x + size.x / 2 - 200 / 2),300},{200,30},[container]() {
-			return std::to_string((int)container->get_height()/100) + "." + std::to_string((container->get_height()/100.0f) - (int)container->get_height()/100).substr(2,2); },"m^3","Volume" };
+			return std::to_string((int)container->get_height() / 100) + "." + std::to_string((container->get_height() / 100.0f) - (int)container->get_height() / 100).substr(2,2); },"m^3","Volume" };
 		addTextDisplay(volume_display);
 
 
 		TextDisplay NoOfCollisions = { {position.x + 40,650},{300,30},[controller]() {
 			return std::to_string((int)controller->collisions_per_second); },"","Collisions per second" };
 		addTextDisplay(NoOfCollisions);
+
+		TextDisplay rms_display = { {position.x + 40,500},{300,30},[controller]() {
+		float rms = controller->calc_rms();
+		return std::to_string((int)rms) + "." + std::to_string(rms - (int)rms).substr(2,2); },"m/s","Root Mean Square Speed" };
+		addTextDisplay(rms_display);
 
 		TextDisplay AverageKeLightParticles = { {position.x + 40,550},{300,30},[controller]() {
 		return std::to_string((int)controller->average_ke_light_particles) + "."
@@ -126,14 +147,6 @@ protected:
 		return std::to_string((int)controller->average_ke_heavy_particles) + "."
 			+ std::to_string(controller->average_ke_heavy_particles - (int)controller->average_ke_heavy_particles).substr(2,2); },"J","Average Ke - Heavy Particles" };
 		addTextDisplay(AverageKeHeavyParticles);
-	};
-
-
-	std::string round_to_2dp(float num) {
-		return std::to_string((int)num) + "." + std::to_string(num - int(num)).substr(2, 2);
 	}
-
-
-
 };
 

@@ -8,7 +8,7 @@ public:
 
 
 	//The controller and container is a needed to access the simulation
-	PressureMode(ParticleController* controller, Container* container) : Gui(olc::Pixel(224, 96, 96), controller, container, { 309,300,100 }) {
+	PressureMode(ParticleController* controller, Container* container) : Gui(olc::Pixel(224, 96, 96), controller, container, { 309,300,150,0,0 }) {
 
 
 		name = "Pressure-Law  Mode";
